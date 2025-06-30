@@ -1,12 +1,11 @@
-#include <sys/types.h>
+#include "header.h"
+
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <sys/stat.h>
-
 
 typedef enum {
     FORMAT_LONG,
@@ -25,28 +24,6 @@ typedef struct struct_options {
 
 _options options;
 
-void sort_ascii(struct dirent *entries[], size_t count) {
-    for (size_t i = 0; i < count - 1; i++) {
-        for (size_t j = 0; j < count - i - 1; j++) {
-            if (strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
-                // Swap pointers
-                struct dirent *tmp = entries[j];
-                entries[j] = entries[j + 1];
-                entries[j + 1] = tmp;
-            }
-        }
-    }
-}
-
-int is_regular_file(const char *path) {
-    struct stat st;
-    if (stat(path, &st) == 0) {
-        return S_ISREG(st.st_mode);
-    } else {
-        perror("stat");
-        return 0;
-    }
-}
 
 const char* print_basename(const char *path) {
     const char *base = strrchr(path, '/');
@@ -67,18 +44,19 @@ void print_regular_file(const char *path) {
     }
 }
 
-char *concat(const char *s1, const char *s2) {
-    size_t len1 = strlen(s1);
-    size_t len2 = strlen(s2);
-    char *result = malloc(len1 + len2 + 2);
-    if (!result) return NULL;
-    strcpy(result, s1);
-    result[len1] = '/';
-    result[len1 + 1] = '\0';
-    strcat(result, s2);
-    return result;
-}
 
+void sort_ascii(struct dirent *entries[], size_t count) {
+    for (size_t i = 0; i < count - 1; i++) {
+        for (size_t j = 0; j < count - i - 1; j++) {
+            if (strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
+                // Swap pointers
+                struct dirent *tmp = entries[j];
+                entries[j] = entries[j + 1];
+                entries[j + 1] = tmp;
+            }
+        }
+    }
+}
 
 int ft_ls(char *path) {
     if (is_regular_file(path)) {
@@ -119,9 +97,7 @@ int ft_ls(char *path) {
     }
 
     closedir(dir);
-
     sort_ascii(entries, entries_number);
-
 
     if (options.is_reversed) {
         // Print in reverse
