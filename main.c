@@ -1,7 +1,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 typedef enum {
@@ -28,9 +30,37 @@ int ft_ls(char *path, _options options) {
         return 1;
     }
 
+    unsigned int entries_number = 0;
     struct dirent *entry;
+
     while ((entry = readdir(dir)) != NULL) {
-        printf("%s ", entry->d_name); // Print entry name
+        entries_number += 1;
+    }
+
+    closedir(dir);
+
+    struct dirent *entries[entries_number];
+    dir = opendir(path);
+    if (!dir) {
+        perror(path);
+        return 1;
+    }
+
+    int i = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        entries[i] = malloc(sizeof(struct dirent));
+        if (entries[i]) {
+            memcpy(entries[i], entry, sizeof(struct dirent));
+            i++;
+        }
+    }
+
+    closedir(dir);
+
+    // Print in reverse
+    for (ssize_t i = entries_number - 1; i >= 0; i--) {
+        printf("%s\n", entries[i]->d_name);
+        free(entries[i]);
     }
 
     return 0;
