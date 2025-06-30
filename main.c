@@ -22,6 +22,20 @@ typedef struct struct_options {
 } _options;
 
 
+void sort_ascii(struct dirent *entries[], size_t count) {
+    for (size_t i = 0; i < count - 1; i++) {
+        for (size_t j = 0; j < count - i - 1; j++) {
+            if (strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
+                // Swap pointers
+                struct dirent *tmp = entries[j];
+                entries[j] = entries[j + 1];
+                entries[j + 1] = tmp;
+            }
+        }
+    }
+}
+
+
 int ft_ls(char *path, _options options) {
     DIR *dir = opendir(path);
 
@@ -56,6 +70,8 @@ int ft_ls(char *path, _options options) {
     }
 
     closedir(dir);
+
+    sort_ascii(entries, entries_number);
 
     // Print in reverse
     for (ssize_t i = entries_number - 1; i >= 0; i--) {
