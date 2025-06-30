@@ -23,6 +23,7 @@ typedef struct struct_options {
     bool include_hidden_files;
 } _options;
 
+_options options;
 
 void sort_ascii(struct dirent *entries[], size_t count) {
     for (size_t i = 0; i < count - 1; i++) {
@@ -69,15 +70,17 @@ void print_regular_file(const char *path) {
 char *concat(const char *s1, const char *s2) {
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);
-    char *result = malloc(len1 + len2 + 1);
+    char *result = malloc(len1 + len2 + 2);
     if (!result) return NULL;
     strcpy(result, s1);
+    result[len1] = '/';
+    result[len1 + 1] = '\0';
     strcat(result, s2);
     return result;
 }
 
 
-int ft_ls(char *path, _options options) {
+int ft_ls(char *path) {
     if (is_regular_file(path)) {
         print_regular_file(path);
         return 0;
@@ -119,14 +122,31 @@ int ft_ls(char *path, _options options) {
 
     sort_ascii(entries, entries_number);
 
-    // Print in reverse
-    for (ssize_t i = entries_number - 1; i >= 0; i--) {
-        // printf("%s\n", );
-        char *complete_path = concat(path, entries[i]->d_name);
-        print_regular_file(complete_path);
-        free(entries[i]);
-        free(complete_path);
+
+    if (options.is_reversed) {
+        // Print in reverse
+        for (ssize_t i = entries_number - 1; i >= 0; i--) {
+            if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
+                continue;
+            }
+            char *complete_path = concat(path, entries[i]->d_name);
+            print_regular_file(complete_path);
+            free(entries[i]);
+            free(complete_path);
+        }
     }
+    else {
+        for (ssize_t i = 0; i <= entries_number; i++) {
+            if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
+                continue;
+            }
+            char *complete_path = concat(path, entries[i]->d_name);
+            print_regular_file(complete_path);
+            free(entries[i]);
+            free(complete_path);
+        }
+    }
+
 
     return 0;
 }
@@ -135,24 +155,25 @@ int ft_ls(char *path, _options options) {
 int start(int argc, char **argv) {
     output_format_t format;
 
-    _options options;
-
     if (isatty(STDOUT_FILENO)) {
         options.format = FORMAT_COLUMNS;
     } else {
         options.format = FORMAT_SINGLE_COLUMN;
     }
 
+
+    options.include_hidden_files = false;
+    options.is_reversed = true;
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
 
     if (argc < 2) {
-        ft_ls(".", options);
+        ft_ls(".");
         return 0;
     }
     for (int i = 1; i < argc; i++) {
-        ft_ls(argv[i], options);
+        ft_ls(argv[i]);
     }
     return 0;
 }
