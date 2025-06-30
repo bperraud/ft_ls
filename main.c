@@ -136,7 +136,7 @@ int ft_ls(char *path) {
         }
     }
     else {
-        for (ssize_t i = 0; i <= entries_number; i++) {
+        for (ssize_t i = 0; i < entries_number; i++) {
             if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
                 continue;
             }
@@ -163,7 +163,7 @@ int start(int argc, char **argv) {
 
 
     options.include_hidden_files = false;
-    options.is_reversed = true;
+    options.is_reversed = false;
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
