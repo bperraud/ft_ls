@@ -16,16 +16,6 @@ const char* path_basename(const char *path) {
 void print_regular_file(const char *path) {
     const char *file_name = path_basename(path);
     printf("%s\n", file_name);
-    // if (is_regular_file(path)) {
-    //     printf("%s\n", file_name);
-    // }
-    // else {
-    //     if (options.is_recursive) {
-    //         // printf("dir : %s\n", path);
-    //         printf("%s:\n", path);
-    //         ft_ls(path);
-    //     }
-    // }
 }
 
 void sort_ascii(struct dirent *entries[], size_t count) {
@@ -70,6 +60,7 @@ int ft_ls(const char *path) {
             // printf("path : %s\n", total_path);
             dir_number += 1;
         }
+        free(total_path);
     }
 
     closedir(dir);
@@ -90,8 +81,6 @@ int ft_ls(const char *path) {
             memcpy(entries[i], entry, sizeof(struct dirent));
             char *comp_path = concat(path, entries[i]->d_name);
             if (!is_regular_file(comp_path) && strcmp(comp_path + strlen(comp_path) - 2, "/.") && strcmp(comp_path + strlen(comp_path) - 3, "/..") && strcmp(comp_path, "./.git")) {
-                // printf("comp path : %s\n", comp_path);
-                // printf("dir_number : %i\n", dir_number);
                 dir_entries[dir_index] = strdup(comp_path);
                 dir_index += 1;
             }
@@ -103,11 +92,11 @@ int ft_ls(const char *path) {
     closedir(dir);
     sort_ascii(entries, entries_number);
 
-
     if (options.is_reversed) {
         // Print in reverse
         for (ssize_t i = entries_number - 1; i >= 0; i--) {
             if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
+                free(entries[i]);
                 continue;
             }
             char *complete_path = concat(path, entries[i]->d_name);
@@ -119,6 +108,7 @@ int ft_ls(const char *path) {
     else {
         for (ssize_t i = 0; i < entries_number; i++) {
             if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
+                free(entries[i]);
                 continue;
             }
             char *complete_path = concat(path, entries[i]->d_name);
@@ -133,6 +123,7 @@ int ft_ls(const char *path) {
             printf("\n");
             printf("%s:\n", dir_entries[i]);
             ft_ls(dir_entries[i]);
+            free(dir_entries[i]);
         }
     }
 

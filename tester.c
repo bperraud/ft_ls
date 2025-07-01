@@ -95,6 +95,8 @@ int main(int argc, char **argv) {
         printf("Nothing captured.\n");
     }
 
+    free(ls_result);
+
     return 0;
 }
 
