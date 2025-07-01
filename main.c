@@ -42,6 +42,11 @@ void sort_ascii(struct dirent *entries[], size_t count) {
 }
 
 int ft_ls(const char *path) {
+
+    if (options.is_recursive && !strcmp(path, ".")) {
+        printf(".:\n");
+    }
+
     if (is_regular_file(path)) {
         print_regular_file(path);
         return 0;
@@ -60,19 +65,17 @@ int ft_ls(const char *path) {
 
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
-        if (!is_regular_file(path)) {
+        char *total_path = concat(path, entry->d_name);
+        if (!is_regular_file(total_path)) {
+            // printf("path : %s\n", total_path);
             dir_number += 1;
         }
     }
 
     closedir(dir);
 
-
-    // dir_number = 3;
-
     struct dirent *entries[entries_number];
-    char *dir_entries[5];
-    // char *dir_entries[dir_number];
+    char *dir_entries[dir_number];
     dir = opendir(path);
     if (!dir) {
         perror(path);
@@ -87,8 +90,8 @@ int ft_ls(const char *path) {
             memcpy(entries[i], entry, sizeof(struct dirent));
             char *comp_path = concat(path, entries[i]->d_name);
             if (!is_regular_file(comp_path) && strcmp(comp_path + strlen(comp_path) - 2, "/.") && strcmp(comp_path + strlen(comp_path) - 3, "/..") && strcmp(comp_path, "./.git")) {
-                printf("comp path : %s\n", comp_path);
-                printf("dir_number : %i\n", dir_number);
+                // printf("comp path : %s\n", comp_path);
+                // printf("dir_number : %i\n", dir_number);
                 dir_entries[dir_index] = strdup(comp_path);
                 dir_index += 1;
             }
@@ -127,10 +130,11 @@ int ft_ls(const char *path) {
 
     if (options.is_recursive) {
         for (ssize_t i = 0; i < dir_index; i++) {
+            printf("\n");
+            printf("%s:\n", dir_entries[i]);
             ft_ls(dir_entries[i]);
         }
     }
-    // ft_ls(dir_entries[0]);
 
     return 0;
 }
@@ -148,6 +152,7 @@ int start(int argc, char **argv) {
     options.include_hidden_files = false;
     options.is_reversed = false;
     options.is_recursive = true;
+
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
