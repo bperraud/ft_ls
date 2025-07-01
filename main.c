@@ -1,31 +1,10 @@
 #include "header.h"
-
-#include <dirent.h>
-#include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-typedef enum {
-    FORMAT_LONG,
-    FORMAT_SINGLE_COLUMN,
-    FORMAT_COLUMNS
-} output_format_t;
-
-
-typedef struct struct_options {
-    output_format_t format;
-    bool is_reversed;
-    bool is_recursive;
-    bool is_time_sorted;
-    bool include_hidden_files;
-} _options;
+#include <sys/types.h>
 
 _options options;
 
-
-const char* print_basename(const char *path) {
+const char* path_basename(const char *path) {
     const char *base = strrchr(path, '/');
     if (base) {
         return base + 1;
@@ -35,15 +14,19 @@ const char* print_basename(const char *path) {
 }
 
 void print_regular_file(const char *path) {
-    path = print_basename(path);
-    if (is_regular_file(path)) {
-        printf("%s\n", path);
-    }
-    else {
-        printf("dir : %s\n", path);
-    }
+    const char *file_name = path_basename(path);
+    printf("%s\n", file_name);
+    // if (is_regular_file(path)) {
+    //     printf("%s\n", file_name);
+    // }
+    // else {
+    //     if (options.is_recursive) {
+    //         // printf("dir : %s\n", path);
+    //         printf("%s:\n", path);
+    //         ft_ls(path);
+    //     }
+    // }
 }
-
 
 void sort_ascii(struct dirent *entries[], size_t count) {
     for (size_t i = 0; i < count - 1; i++) {
@@ -58,7 +41,7 @@ void sort_ascii(struct dirent *entries[], size_t count) {
     }
 }
 
-int ft_ls(char *path) {
+int ft_ls(const char *path) {
     if (is_regular_file(path)) {
         print_regular_file(path);
         return 0;
@@ -72,15 +55,24 @@ int ft_ls(char *path) {
     }
 
     unsigned int entries_number = 0;
+    unsigned int dir_number = 0;
     struct dirent *entry;
 
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
+        if (!is_regular_file(path)) {
+            dir_number += 1;
+        }
     }
 
     closedir(dir);
 
+
+    // dir_number = 3;
+
     struct dirent *entries[entries_number];
+    char *dir_entries[5];
+    // char *dir_entries[dir_number];
     dir = opendir(path);
     if (!dir) {
         perror(path);
@@ -88,16 +80,26 @@ int ft_ls(char *path) {
     }
 
     int i = 0;
+    int dir_index = 0;
     while ((entry = readdir(dir)) != NULL) {
         entries[i] = malloc(sizeof(struct dirent));
         if (entries[i]) {
             memcpy(entries[i], entry, sizeof(struct dirent));
+            char *comp_path = concat(path, entries[i]->d_name);
+            if (!is_regular_file(comp_path) && strcmp(comp_path + strlen(comp_path) - 2, "/.") && strcmp(comp_path + strlen(comp_path) - 3, "/..") && strcmp(comp_path, "./.git")) {
+                printf("comp path : %s\n", comp_path);
+                printf("dir_number : %i\n", dir_number);
+                dir_entries[dir_index] = strdup(comp_path);
+                dir_index += 1;
+            }
+            free(comp_path);
             i++;
         }
     }
 
     closedir(dir);
     sort_ascii(entries, entries_number);
+
 
     if (options.is_reversed) {
         // Print in reverse
@@ -123,6 +125,12 @@ int ft_ls(char *path) {
         }
     }
 
+    if (options.is_recursive) {
+        for (ssize_t i = 0; i < dir_index; i++) {
+            ft_ls(dir_entries[i]);
+        }
+    }
+    // ft_ls(dir_entries[0]);
 
     return 0;
 }
@@ -137,9 +145,9 @@ int start(int argc, char **argv) {
         options.format = FORMAT_SINGLE_COLUMN;
     }
 
-
     options.include_hidden_files = false;
     options.is_reversed = false;
+    options.is_recursive = true;
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
