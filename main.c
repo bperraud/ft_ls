@@ -26,15 +26,9 @@ char * get_ctime_ls_format(time_t mod_time) {
     full = ctime(&mod_time);
     full[16] = '\0';
     return full + 4;
-    // printf("%s\n", full + 4);
 }
 
 void string_format(size_t len, size_t max_len) {
-    // if (len < max_len) {
-    //     printf("len : %ld\n", len);
-    //     printf("maxlen : %ld\n", max_len);
-    // }
-    
     for (int i = len; i < max_len; i++) {
         putchar(' ');
     }
