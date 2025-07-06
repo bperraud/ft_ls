@@ -87,6 +87,23 @@ void sort_ascii(struct dirent *entries[], size_t count) {
     }
 }
 
+
+blkcnt_t get_block_size(const char *path) {
+    struct stat st;
+
+    if (lstat(path, &st) != 0) {
+        perror("lstat");
+        exit(1);
+    }
+    return st.st_blocks / 2;
+}
+
+
+bool is_special_dir(const char *path) {
+    return !strcmp(path, ".") || !strcmp(path, "..") || !strcmp(path, ".git");
+}
+
+
 int ft_ls(const char *path) {
     unsigned int line_len;
     _print_max_len print_max_len;
@@ -115,10 +132,14 @@ int ft_ls(const char *path) {
     unsigned int entries_number = 0;
     unsigned int dir_number = 0;
     struct dirent *entry;
+    blkcnt_t total_blocks = 0;
 
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
+
         char *total_path = concat(path, entry->d_name);
+        if (!is_special_dir(entry->d_name))
+            total_blocks += get_block_size(total_path);
         if (!is_regular_file(total_path)) {
             // printf("path : %s\n", total_path);
             dir_number += 1;
@@ -126,6 +147,7 @@ int ft_ls(const char *path) {
         get_max_line_length(total_path, &print_max_len);
         free(total_path);
     }
+    printf("total %lld\n", (long long)total_blocks);
 
     closedir(dir);
 
@@ -144,7 +166,8 @@ int ft_ls(const char *path) {
         if (entries[i]) {
             memcpy(entries[i], entry, sizeof(struct dirent));
             char *comp_path = concat(path, entries[i]->d_name);
-            if (!is_regular_file(comp_path) && strcmp(comp_path + strlen(comp_path) - 2, "/.") && strcmp(comp_path + strlen(comp_path) - 3, "/..") && strcmp(comp_path, "./.git")) {
+            // if (!is_regular_file(comp_path) && !is_special_dir(comp_path)) {
+            if (!is_regular_file(comp_path) && !is_special_dir(entries[i]->d_name)) {
                 dir_entries[dir_index] = strdup(comp_path);
                 dir_index += 1;
             }
