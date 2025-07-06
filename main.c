@@ -47,7 +47,10 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
         string_format(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
         printf("%s ", getgrgid(st.st_gid)->gr_name);
         string_format(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
-        string_format(strlen(ft_itoa(st.st_size)), print_max_len->size);
+
+        char *st_size_str = ft_itoa(st.st_size);
+        string_format(strlen(st_size_str), print_max_len->size);
+        free(st_size_str);
         printf("%ld ", st.st_size);
         printf("%s ", get_ctime_ls_format(st.st_mtime));
         if (S_ISLNK(st.st_mode)) {
@@ -70,7 +73,9 @@ void get_max_line_length(const char *path, _print_max_len *print_max_len) {
     }
     print_max_len->uid = MAX(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
     print_max_len->gid = MAX(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
-    print_max_len->size = MAX(strlen(ft_itoa(st.st_size)), print_max_len->size);
+    char *st_size_str = ft_itoa(st.st_size);
+    print_max_len->size = MAX(strlen(st_size_str), print_max_len->size);
+    free(st_size_str);
     print_max_len->datetime = MAX(strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
 }
 
@@ -138,16 +143,18 @@ int ft_ls(const char *path) {
         entries_number += 1;
 
         char *total_path = concat(path, entry->d_name);
-        if (!is_special_dir(entry->d_name))
-            total_blocks += get_block_size(total_path);
+        // if (!is_special_dir(entry->d_name))
+        //     total_blocks += get_block_size(total_path);
         if (!is_regular_file(total_path)) {
-            // printf("path : %s\n", total_path);
             dir_number += 1;
         }
         get_max_line_length(total_path, &print_max_len);
         free(total_path);
     }
-    printf("total %lld\n", (long long)total_blocks);
+
+
+    if (options.format == FORMAT_LONG)
+        printf("total %lld\n", (long long)total_blocks);
 
     closedir(dir);
 
