@@ -1,11 +1,18 @@
 #include "header.h"
+#include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+#include <sys/stat.h>
+#include <time.h>
 
 _options options;
 
 const char* path_basename(const char *path) {
-    const char *base = strrchr(path, '/');
+    const char *base;
+
+    base = strrchr(path, '/');
     if (base) {
         return base + 1;
     } else {
@@ -13,9 +20,64 @@ const char* path_basename(const char *path) {
     }
 }
 
-void print_regular_file(const char *path) {
-    const char *file_name = path_basename(path);
+char * get_ctime_ls_format(time_t mod_time) {
+    char *full;
+
+    full = ctime(&mod_time);
+    full[16] = '\0';
+    return full + 4;
+    // printf("%s\n", full + 4);
+}
+
+void string_format(size_t len, size_t max_len) {
+    // if (len < max_len) {
+    //     printf("len : %ld\n", len);
+    //     printf("maxlen : %ld\n", max_len);
+    // }
+    
+    for (int i = len; i < max_len; i++) {
+        putchar(' ');
+    }
+}
+
+void print_regular_file(const char *path, _print_max_len *print_max_len) {
+    struct stat st;
+    const char *file_name;
+
+    if (options.format == FORMAT_LONG) {
+        if (lstat(path, &st) != 0) {
+            perror("lstat");
+            exit(1);
+        }
+        printf("%s ", getpwuid(st.st_uid)->pw_name);
+        string_format(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
+        printf("%s ", getgrgid(st.st_gid)->gr_name);
+        string_format(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
+        string_format(strlen(ft_itoa(st.st_size)), print_max_len->size);
+        printf("%ld ", st.st_size);
+        printf("%s ", get_ctime_ls_format(st.st_mtime));
+        if (S_ISLNK(st.st_mode)) {
+            printf("It's a symbolic link\n");
+        }
+    }
+    file_name = path_basename(path);
     printf("%s\n", file_name);
+}
+
+
+void get_max_line_length(const char *path, _print_max_len *print_max_len) {
+    unsigned int len = 0;
+    struct stat st;
+    const char *file_name;
+
+    if (lstat(path, &st) != 0) {
+        perror("lstat");
+        exit(1);
+    }
+    print_max_len->uid = MAX(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
+    print_max_len->gid = MAX(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
+    print_max_len->size = MAX(strlen(ft_itoa(st.st_size)), print_max_len->size);
+    print_max_len->datetime = MAX(strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
 }
 
 void sort_ascii(struct dirent *entries[], size_t count) {
@@ -32,13 +94,20 @@ void sort_ascii(struct dirent *entries[], size_t count) {
 }
 
 int ft_ls(const char *path) {
+    unsigned int line_len;
+    _print_max_len print_max_len;
+
+    print_max_len.size = 0;
+    print_max_len.uid = 0;
+    print_max_len.gid = 0;
+    print_max_len.datetime = 0;
 
     if (options.is_recursive && !strcmp(path, ".")) {
         printf(".:\n");
     }
 
     if (is_regular_file(path)) {
-        print_regular_file(path);
+        print_regular_file(path, NULL);
         return 0;
     }
 
@@ -60,6 +129,7 @@ int ft_ls(const char *path) {
             // printf("path : %s\n", total_path);
             dir_number += 1;
         }
+        get_max_line_length(total_path, &print_max_len);
         free(total_path);
     }
 
@@ -100,7 +170,7 @@ int ft_ls(const char *path) {
                 continue;
             }
             char *complete_path = concat(path, entries[i]->d_name);
-            print_regular_file(complete_path);
+            print_regular_file(complete_path, &print_max_len);
             free(entries[i]);
             free(complete_path);
         }
@@ -112,7 +182,7 @@ int ft_ls(const char *path) {
                 continue;
             }
             char *complete_path = concat(path, entries[i]->d_name);
-            print_regular_file(complete_path);
+            print_regular_file(complete_path, &print_max_len);
             free(entries[i]);
             free(complete_path);
         }
@@ -143,6 +213,7 @@ int start(int argc, char **argv) {
     options.include_hidden_files = false;
     options.is_reversed = false;
     options.is_recursive = true;
+    options.format = FORMAT_LONG;
 
     // if (long_listing) {
     //     format = FORMAT_LONG;
