@@ -82,12 +82,19 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
         free(st_size_str);
         printf("%ld ", st.st_size);
         printf("%s ", get_ctime_ls_format(st.st_mtime));
-        if (S_ISLNK(st.st_mode)) {
-            printf("It's a symbolic link\n");
-        }
     }
     file_name = path_basename(path);
-    printf("%s\n", file_name);
+    printf("%s", file_name);
+
+    if (options.format == FORMAT_LONG) {
+        if (S_ISLNK(st.st_mode)) {
+            char buffer[strlen(path_basename(path)) + 1];
+            ssize_t len = readlink(path, buffer, sizeof(buffer) - 1);
+            buffer[len] = '\0';
+            printf(" -> %s", buffer);
+        }
+    }
+    printf("\n");
 }
 
 
