@@ -61,6 +61,13 @@ void string_format(size_t len, size_t max_len) {
     }
 }
 
+void print_symlink(struct stat st, const char* path) {
+    char buffer[strlen(path_basename(path)) + 1];
+    ssize_t len = readlink(path, buffer, sizeof(buffer) - 1);
+    buffer[len] = '\0';
+    printf(" -> %s", buffer);
+}
+
 void print_regular_file(const char *path, _print_max_len *print_max_len) {
     struct stat st;
     const char *file_name;
@@ -86,14 +93,9 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     file_name = path_basename(path);
     printf("%s", file_name);
 
-    if (options.format == FORMAT_LONG) {
-        if (S_ISLNK(st.st_mode)) {
-            char buffer[strlen(path_basename(path)) + 1];
-            ssize_t len = readlink(path, buffer, sizeof(buffer) - 1);
-            buffer[len] = '\0';
-            printf(" -> %s", buffer);
-        }
-    }
+    if (options.format == FORMAT_LONG && S_ISLNK(st.st_mode))
+        print_symlink(st, path);
+
     printf("\n");
 }
 
@@ -157,7 +159,7 @@ int ft_ls(const char *path) {
     }
 
     if (is_regular_file(path)) {
-        print_regular_file(path, NULL);
+        print_regular_file(path, &print_max_len);
         return 0;
     }
 
@@ -184,7 +186,6 @@ int ft_ls(const char *path) {
         get_max_line_length(total_path, &print_max_len);
         free(total_path);
     }
-
 
     if (options.format == FORMAT_LONG)
         printf("total %lld\n", (long long)total_blocks);
@@ -219,30 +220,32 @@ int ft_ls(const char *path) {
     closedir(dir);
     sort_ascii(entries, entries_number);
 
+    ssize_t start;
+    ssize_t end;
+    ssize_t step;
+
     if (options.is_reversed) {
-        // Print in reverse
-        for (ssize_t i = entries_number - 1; i >= 0; i--) {
-            if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
-                free(entries[i]);
-                continue;
-            }
-            char *complete_path = concat(path, entries[i]->d_name);
-            print_regular_file(complete_path, &print_max_len);
-            free(entries[i]);
-            free(complete_path);
-        }
+        start = entries_number - 1;
+        end = -1;
+        step = -1;
+
     }
     else {
-        for (ssize_t i = 0; i < entries_number; i++) {
-            if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
-                free(entries[i]);
-                continue;
-            }
-            char *complete_path = concat(path, entries[i]->d_name);
-            print_regular_file(complete_path, &print_max_len);
+        start = 0;
+        end = entries_number;
+        step = 1;
+    }
+
+    for (ssize_t i = start; i != end; i += step) {
+        if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
             free(entries[i]);
-            free(complete_path);
+            continue;
         }
+
+        char *complete_path = concat(path, entries[i]->d_name);
+        print_regular_file(complete_path, &print_max_len);
+        free(entries[i]);
+        free(complete_path);
     }
 
     if (options.is_recursive) {
