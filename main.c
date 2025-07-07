@@ -20,6 +20,33 @@ const char* path_basename(const char *path) {
     }
 }
 
+void print_permissions(mode_t mode) {
+    char perms[11] = {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '\0'};
+
+    // file type
+    if (S_ISDIR(mode)) perms[0] = 'd';
+    else if (S_ISLNK(mode)) perms[0] = 'l';
+    else if (S_ISCHR(mode)) perms[0] = 'c';
+    else if (S_ISBLK(mode)) perms[0] = 'b';
+    else if (S_ISSOCK(mode)) perms[0] = 's';
+    else if (S_ISFIFO(mode)) perms[0] = 'p';
+    // user
+    if (mode & S_IRUSR) perms[1] = 'r';
+    if (mode & S_IWUSR) perms[2] = 'w';
+    if (mode & S_IXUSR) perms[3] = 'x';
+    // group
+    if (mode & S_IRGRP) perms[4] = 'r';
+    if (mode & S_IWGRP) perms[5] = 'w';
+    if (mode & S_IXGRP) perms[6] = 'x';
+    // others
+    if (mode & S_IROTH) perms[7] = 'r';
+    if (mode & S_IWOTH) perms[8] = 'w';
+    if (mode & S_IXOTH) perms[9] = 'x';
+
+    printf("%s ", perms);
+}
+
+
 char * get_ctime_ls_format(time_t mod_time) {
     char *full;
 
@@ -37,18 +64,19 @@ void string_format(size_t len, size_t max_len) {
 void print_regular_file(const char *path, _print_max_len *print_max_len) {
     struct stat st;
     const char *file_name;
+    char *st_size_str;
 
     if (options.format == FORMAT_LONG) {
         if (lstat(path, &st) != 0) {
             perror("lstat");
             exit(1);
         }
+        print_permissions(st.st_mode);
         printf("%s ", getpwuid(st.st_uid)->pw_name);
         string_format(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
         printf("%s ", getgrgid(st.st_gid)->gr_name);
         string_format(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
-
-        char *st_size_str = ft_itoa(st.st_size);
+        st_size_str = ft_itoa(st.st_size);
         string_format(strlen(st_size_str), print_max_len->size);
         free(st_size_str);
         printf("%ld ", st.st_size);
@@ -63,9 +91,10 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
 
 
 void get_max_line_length(const char *path, _print_max_len *print_max_len) {
-    unsigned int len = 0;
-    struct stat st;
-    const char *file_name;
+    unsigned int    len = 0;
+    struct stat     st;
+    const char *    file_name;
+    char *          st_size_str;
 
     if (lstat(path, &st) != 0) {
         perror("lstat");
@@ -73,18 +102,20 @@ void get_max_line_length(const char *path, _print_max_len *print_max_len) {
     }
     print_max_len->uid = MAX(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
     print_max_len->gid = MAX(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
-    char *st_size_str = ft_itoa(st.st_size);
+    st_size_str = ft_itoa(st.st_size);
     print_max_len->size = MAX(strlen(st_size_str), print_max_len->size);
-    free(st_size_str);
     print_max_len->datetime = MAX(strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
+    free(st_size_str);
 }
 
 void sort_ascii(struct dirent *entries[], size_t count) {
+    struct dirent *tmp;
+
     for (size_t i = 0; i < count - 1; i++) {
         for (size_t j = 0; j < count - i - 1; j++) {
             if (strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
                 // Swap pointers
-                struct dirent *tmp = entries[j];
+                tmp = entries[j];
                 entries[j] = entries[j + 1];
                 entries[j + 1] = tmp;
             }
@@ -110,13 +141,8 @@ bool is_special_dir(const char *path) {
 
 
 int ft_ls(const char *path) {
-    unsigned int line_len;
-    _print_max_len print_max_len;
-
-    print_max_len.size = 0;
-    print_max_len.uid = 0;
-    print_max_len.gid = 0;
-    print_max_len.datetime = 0;
+    _print_max_len print_max_len = {0};
+    DIR *dir;
 
     if (options.is_recursive && !strcmp(path, ".")) {
         printf(".:\n");
@@ -127,7 +153,7 @@ int ft_ls(const char *path) {
         return 0;
     }
 
-    DIR *dir = opendir(path);
+    dir = opendir(path);
 
     if (!dir) {
         perror(path);
@@ -136,15 +162,14 @@ int ft_ls(const char *path) {
 
     unsigned int entries_number = 0;
     unsigned int dir_number = 0;
+    blkcnt_t     total_blocks = 0;
     struct dirent *entry;
-    blkcnt_t total_blocks = 0;
 
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
-
         char *total_path = concat(path, entry->d_name);
-        // if (!is_special_dir(entry->d_name))
-        //     total_blocks += get_block_size(total_path);
+        if (!is_special_dir(entry->d_name))
+            total_blocks += get_block_size(total_path);
         if (!is_regular_file(total_path)) {
             dir_number += 1;
         }
