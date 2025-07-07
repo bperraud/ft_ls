@@ -6,15 +6,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <sys/stat.h>
-
+#include <unistd.h>
 
 int is_regular_file(const char *path) {
     struct stat st;
     if (stat(path, &st) == 0) {
         return S_ISREG(st.st_mode);
     } else {
-        perror("stat");
-        return 0;
+        return -1;
     }
 }
 

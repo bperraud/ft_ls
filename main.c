@@ -158,6 +158,14 @@ int ft_ls(const char *path) {
         printf(".:\n");
     }
 
+    if (is_regular_file(path) == -1) {
+        write(STDERR_FILENO, "ls: cannot access '", 19);
+        write(STDERR_FILENO, path, strlen(path));
+        write(STDERR_FILENO, "': ", 3);
+        perror(NULL);
+        return 0;
+    }
+
     if (is_regular_file(path)) {
         print_regular_file(path, &print_max_len);
         return 0;
