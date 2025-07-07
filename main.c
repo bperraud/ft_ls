@@ -72,6 +72,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
             exit(1);
         }
         print_permissions(st.st_mode);
+        printf("%lu ", (unsigned long)st.st_nlink);
         printf("%s ", getpwuid(st.st_uid)->pw_name);
         string_format(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
         printf("%s ", getgrgid(st.st_gid)->gr_name);
