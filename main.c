@@ -163,7 +163,7 @@ int ft_ls(const char *path) {
         write(STDERR_FILENO, path, strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);
-        return 0;
+        return 1;
     }
 
     if (is_regular_file(path)) {
@@ -286,17 +286,19 @@ int start(int argc, char **argv) {
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
+    int exit_code;
+    int code;
 
     if (argc < 2) {
-        ft_ls(".");
-        return 0;
+        return ft_ls(".");
     }
     for (int i = 1; i < argc; i++) {
-        ft_ls(argv[i]);
+        code = ft_ls(argv[i]);
+        exit_code = MAX(exit_code, code);
     }
-    return 0;
+    return exit_code;
 }
 
-// int main(int argc, char **argv) {
-//     return start(argc, argv);
-// }
+int main(int argc, char **argv) {
+    return start(argc, argv);
+}
