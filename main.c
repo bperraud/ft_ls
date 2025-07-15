@@ -205,8 +205,7 @@ int ft_ls(const char *path) {
         if (entries[i]) {
             memcpy(entries[i], entry, sizeof(struct dirent));
             char *comp_path = concat(path, entries[i]->d_name);
-            // if (!is_regular_file(comp_path) && !is_special_dir(comp_path)) {
-            if (!is_regular_file(comp_path) && !is_special_dir(entries[i]->d_name)) {
+            if (options.is_recursive && !is_regular_file(comp_path) && !is_special_dir(entries[i]->d_name)) {
                 dir_entries[dir_index] = strdup(comp_path);
                 dir_index += 1;
             }
