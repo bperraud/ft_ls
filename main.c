@@ -236,7 +236,6 @@ int ft_ls(const char *path) {
         start = entries_number - 1;
         end = -1;
         step = -1;
-
     }
     else {
         start = 0;
@@ -286,17 +285,17 @@ int start(int argc, char **argv) {
     // if (long_listing) {
     //     format = FORMAT_LONG;
     // }
-    int exit_code;
-    int code;
+    int program_exit_code;
+    int ft_exit_code;
 
     if (argc < 2) {
         return ft_ls(".");
     }
     for (int i = 1; i < argc; i++) {
-        code = ft_ls(argv[i]);
-        exit_code = MAX(exit_code, code);
+        ft_exit_code = ft_ls(argv[i]);
+        program_exit_code = MAX(program_exit_code, ft_exit_code);
     }
-    return exit_code;
+    return program_exit_code;
 }
 
 int main(int argc, char **argv) {
