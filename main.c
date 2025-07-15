@@ -273,15 +273,21 @@ int start(int argc, char **argv) {
 
     int program_exit_code;
     int ft_exit_code;
+    int option_arg = 0;
 
     if (argc < 2) {
         return ft_ls(".");
     }
     for (int i = 1; i < argc; i++) {
-        if (argv[i] == NULL)
+        if (argv[i] == NULL) {
+            option_arg += 1;
             continue;
+        }
         ft_exit_code = ft_ls(argv[i]);
         program_exit_code = MAX(program_exit_code, ft_exit_code);
+    }
+    if (option_arg == argc - 1) {
+        return ft_ls(".");
     }
     return program_exit_code;
 }
