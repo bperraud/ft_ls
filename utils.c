@@ -17,6 +17,17 @@ int is_regular_file(const char *path) {
     }
 }
 
+const char* path_basename(const char *path) {
+    const char *base;
+
+    base = strrchr(path, '/');
+    if (base) {
+        return base + 1;
+    } else {
+        return path;
+    }
+}
+
 char *concat(const char *s1, const char *s2) {
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);

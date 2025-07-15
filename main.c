@@ -9,16 +9,6 @@
 
 _options options;
 
-const char* path_basename(const char *path) {
-    const char *base;
-
-    base = strrchr(path, '/');
-    if (base) {
-        return base + 1;
-    } else {
-        return path;
-    }
-}
 
 void print_permissions(mode_t mode) {
     char perms[11] = {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '\0'};
@@ -268,6 +258,8 @@ int ft_ls(const char *path) {
 }
 
 
+_options parse(int argc, char **argv);
+
 int start(int argc, char **argv) {
     output_format_t format;
 
@@ -277,14 +269,8 @@ int start(int argc, char **argv) {
         options.format = FORMAT_SINGLE_COLUMN;
     }
 
-    options.include_hidden_files = false;
-    options.is_reversed = false;
-    options.is_recursive = true;
-    options.format = FORMAT_LONG;
+    options = parse(argc, argv);
 
-    // if (long_listing) {
-    //     format = FORMAT_LONG;
-    // }
     int program_exit_code;
     int ft_exit_code;
 
@@ -292,6 +278,8 @@ int start(int argc, char **argv) {
         return ft_ls(".");
     }
     for (int i = 1; i < argc; i++) {
+        if (argv[i] == NULL)
+            continue;
         ft_exit_code = ft_ls(argv[i]);
         program_exit_code = MAX(program_exit_code, ft_exit_code);
     }

@@ -10,6 +10,7 @@
 
 int is_regular_file(const char *path);
 char *concat(const char *s1, const char *s2);
+const char* path_basename(const char *path);
 char	*ft_itoa(int n);
 
 
