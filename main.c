@@ -1,11 +1,15 @@
 #include "header.h"
+#include "libft/libft/libft.h"
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
 #include <sys/stat.h>
 #include <time.h>
+
+#include "libft/ft_printf.h"
 
 _options options;
 
@@ -33,7 +37,7 @@ void print_permissions(mode_t mode) {
     if (mode & S_IWOTH) perms[8] = 'w';
     if (mode & S_IXOTH) perms[9] = 'x';
 
-    printf("%s ", perms);
+    ft_printf("%s ", perms);
 }
 
 
@@ -48,8 +52,7 @@ char * get_ctime_ls_format(time_t mod_time) {
 void string_format(size_t len, size_t max_len) {
     char a = ' ';
     for (size_t i = len; i < max_len; i++) {
-        write(1, &a, 1);
-        // putchar(' ');
+        write(0, &a, 1);
     }
 }
 
@@ -57,7 +60,7 @@ void print_symlink(const char* path) {
     char buffer[ft_strlen(path_basename(path)) + 1];
     ssize_t len = readlink(path, buffer, sizeof(buffer) - 1);
     buffer[len] = '\0';
-    printf(" -> %s", buffer);
+    ft_printf(" -> %s", buffer);
 }
 
 void print_regular_file(const char *path, _print_max_len *print_max_len) {
@@ -71,24 +74,24 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
             exit(1);
         }
         print_permissions(st.st_mode);
-        printf("%lu ", (unsigned long)st.st_nlink);
-        printf("%s ", getpwuid(st.st_uid)->pw_name);
+        ft_printf("%u ", (unsigned int)st.st_nlink);
+        ft_printf("%s ", getpwuid(st.st_uid)->pw_name);
         string_format(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
-        printf("%s ", getgrgid(st.st_gid)->gr_name);
+        ft_printf("%s ", getgrgid(st.st_gid)->gr_name);
         string_format(ft_strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
         st_size_str = ft_itoa(st.st_size);
         string_format(ft_strlen(st_size_str), print_max_len->size);
         free(st_size_str);
-        printf("%ld ", st.st_size);
-        printf("%s ", get_ctime_ls_format(st.st_mtime));
+        ft_printf("%d ", st.st_size);
+        ft_printf("%s ", get_ctime_ls_format(st.st_mtime));
     }
     file_name = path_basename(path);
-    printf("%s", file_name);
+    ft_printf("%s", file_name);
 
     if (options.format == FORMAT_LONG && S_ISLNK(st.st_mode))
         print_symlink(path);
 
-    printf("\n");
+    ft_printf("\n");
 }
 
 
@@ -145,7 +148,7 @@ int ft_ls(const char *path) {
     DIR *dir;
 
     if (options.is_recursive && !strcmp(path, ".")) {
-        printf(".:\n");
+        ft_printf(".:\n");
     }
 
     if (is_regular_file(path) == -1) {
@@ -186,7 +189,8 @@ int ft_ls(const char *path) {
     }
 
     if (options.format == FORMAT_LONG)
-        printf("total %lld\n", (long long)total_blocks);
+        ft_printf("total %d\n", total_blocks);
+        // ft_printf("total %lld\n", (long long)total_blocks);
 
     closedir(dir);
 
@@ -246,8 +250,8 @@ int ft_ls(const char *path) {
 
     if (options.is_recursive) {
         for (ssize_t i = 0; i < dir_index; i++) {
-            printf("\n");
-            printf("%s:\n", dir_entries[i]);
+            ft_printf("\n");
+            ft_printf("%s:\n", dir_entries[i]);
             ft_ls(dir_entries[i]);
             free(dir_entries[i]);
         }
