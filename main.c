@@ -69,7 +69,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     char *st_size_str;
     char *st_nlink_str;
 
-    if (options.format == FORMAT_LONG) {
+    if (options.is_long_format) {
         if (lstat(path, &st) != 0) {
             perror("lstat");
             exit(1);
@@ -92,7 +92,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     file_name = path_basename(path);
     ft_printf("%s", file_name);
 
-    if (options.format == FORMAT_LONG && S_ISLNK(st.st_mode))
+    if (options.is_long_format && S_ISLNK(st.st_mode))
         print_symlink(path);
 
     ft_printf("\n");
@@ -196,7 +196,7 @@ int ft_ls(const char *path) {
         free(total_path);
     }
 
-    if (options.format == FORMAT_LONG)
+    if (options.is_long_format)
         ft_printf("total %d\n", total_blocks);
         // ft_printf("total %lld\n", (long long)total_blocks);
 
@@ -272,11 +272,6 @@ int ft_ls(const char *path) {
 _options parse(int argc, char **argv);
 
 int start(int argc, char **argv) {
-    if (isatty(STDOUT_FILENO)) {
-        options.format = FORMAT_COLUMNS;
-    } else {
-        options.format = FORMAT_SINGLE_COLUMN;
-    }
 
     options = parse(argc, argv);
 

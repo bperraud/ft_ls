@@ -12,12 +12,6 @@
 
 // main
 
-typedef enum {
-    FORMAT_LONG,
-    FORMAT_SINGLE_COLUMN,
-    FORMAT_COLUMNS
-} output_format_t;
-
 typedef struct struct_print_len {
     size_t uid;
     size_t gid;
@@ -27,7 +21,7 @@ typedef struct struct_print_len {
 } _print_max_len;
 
 typedef struct struct_options {
-    output_format_t format;
+    bool is_long_format;
     bool is_reversed;
     bool is_recursive;
     bool is_time_sorted;
