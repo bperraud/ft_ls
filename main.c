@@ -124,7 +124,7 @@ void sort_ascii(struct dirent *entries[], size_t count) {
 
     for (size_t i = 0; i < count - 1; i++) {
         for (size_t j = 0; j < count - i - 1; j++) {
-            if (strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
+            if (ft_strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
                 // Swap pointers
                 tmp = entries[j];
                 entries[j] = entries[j + 1];
@@ -147,7 +147,7 @@ blkcnt_t get_block_size(const char *path) {
 
 
 bool is_special_dir(const char *path) {
-    return !strcmp(path, ".") || !strcmp(path, "..") || !strcmp(path, ".git");
+    return !ft_strcmp(path, ".") || !ft_strcmp(path, "..") || !ft_strcmp(path, ".git");
 }
 
 
@@ -155,7 +155,7 @@ int ft_ls(const char *path) {
     _print_max_len print_max_len = {0};
     DIR *dir;
 
-    if (options.is_recursive && !strcmp(path, ".")) {
+    if (options.is_recursive && !ft_strcmp(path, ".")) {
         ft_printf(".:\n");
     }
 
