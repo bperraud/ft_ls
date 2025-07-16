@@ -67,6 +67,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     struct stat st;
     const char *file_name;
     char *st_size_str;
+    char *st_nlink_str;
 
     if (options.format == FORMAT_LONG) {
         if (lstat(path, &st) != 0) {
@@ -74,6 +75,8 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
             exit(1);
         }
         print_permissions(st.st_mode);
+        st_nlink_str = ft_itoa(st.st_nlink);
+        string_format(ft_strlen(st_nlink_str), print_max_len->hard_links);
         ft_printf("%u ", (unsigned int)st.st_nlink);
         ft_printf("%s ", getpwuid(st.st_uid)->pw_name);
         string_format(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
@@ -82,6 +85,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
         st_size_str = ft_itoa(st.st_size);
         string_format(ft_strlen(st_size_str), print_max_len->size);
         free(st_size_str);
+        free(st_nlink_str);
         ft_printf("%d ", st.st_size);
         ft_printf("%s ", get_ctime_ls_format(st.st_mtime));
     }
@@ -98,17 +102,21 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
 void get_max_line_length(const char *path, _print_max_len *print_max_len) {
     struct stat     st;
     char *          st_size_str;
+    char *          st_nlink_str;
 
     if (lstat(path, &st) != 0) {
         perror("lstat");
         exit(1);
     }
+    st_nlink_str = ft_itoa(st.st_nlink);
+    print_max_len->hard_links = MAX(ft_strlen(st_nlink_str), print_max_len->hard_links);
     print_max_len->uid = MAX(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
     print_max_len->gid = MAX(ft_strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
     st_size_str = ft_itoa(st.st_size);
     print_max_len->size = MAX(ft_strlen(st_size_str), print_max_len->size);
     print_max_len->datetime = MAX(ft_strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
     free(st_size_str);
+    free(st_nlink_str);
 }
 
 void sort_ascii(struct dirent *entries[], size_t count) {
@@ -207,10 +215,10 @@ int ft_ls(const char *path) {
     while ((entry = readdir(dir)) != NULL) {
         entries[i] = malloc(sizeof(struct dirent));
         if (entries[i]) {
-            memcpy(entries[i], entry, sizeof(struct dirent));
+            ft_memcpy(entries[i], entry, sizeof(struct dirent));
             char *comp_path = concat(path, entries[i]->d_name);
             if (options.is_recursive && !is_regular_file(comp_path) && !is_special_dir(entries[i]->d_name)) {
-                dir_entries[dir_index] = strdup(comp_path);
+                dir_entries[dir_index] = ft_strdup(comp_path);
                 dir_index += 1;
             }
             free(comp_path);

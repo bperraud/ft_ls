@@ -21,6 +21,7 @@ typedef enum {
 typedef struct struct_print_len {
     size_t uid;
     size_t gid;
+    size_t hard_links;
     size_t size;
     size_t datetime;
 } _print_max_len;
