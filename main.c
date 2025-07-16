@@ -46,13 +46,15 @@ char * get_ctime_ls_format(time_t mod_time) {
 }
 
 void string_format(size_t len, size_t max_len) {
-    for (int i = len; i < max_len; i++) {
-        putchar(' ');
+    char a = ' ';
+    for (size_t i = len; i < max_len; i++) {
+        write(1, &a, 1);
+        // putchar(' ');
     }
 }
 
-void print_symlink(struct stat st, const char* path) {
-    char buffer[strlen(path_basename(path)) + 1];
+void print_symlink(const char* path) {
+    char buffer[ft_strlen(path_basename(path)) + 1];
     ssize_t len = readlink(path, buffer, sizeof(buffer) - 1);
     buffer[len] = '\0';
     printf(" -> %s", buffer);
@@ -71,11 +73,11 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
         print_permissions(st.st_mode);
         printf("%lu ", (unsigned long)st.st_nlink);
         printf("%s ", getpwuid(st.st_uid)->pw_name);
-        string_format(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
+        string_format(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
         printf("%s ", getgrgid(st.st_gid)->gr_name);
-        string_format(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
+        string_format(ft_strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
         st_size_str = ft_itoa(st.st_size);
-        string_format(strlen(st_size_str), print_max_len->size);
+        string_format(ft_strlen(st_size_str), print_max_len->size);
         free(st_size_str);
         printf("%ld ", st.st_size);
         printf("%s ", get_ctime_ls_format(st.st_mtime));
@@ -84,27 +86,25 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     printf("%s", file_name);
 
     if (options.format == FORMAT_LONG && S_ISLNK(st.st_mode))
-        print_symlink(st, path);
+        print_symlink(path);
 
     printf("\n");
 }
 
 
 void get_max_line_length(const char *path, _print_max_len *print_max_len) {
-    unsigned int    len = 0;
     struct stat     st;
-    const char *    file_name;
     char *          st_size_str;
 
     if (lstat(path, &st) != 0) {
         perror("lstat");
         exit(1);
     }
-    print_max_len->uid = MAX(strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
-    print_max_len->gid = MAX(strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
+    print_max_len->uid = MAX(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
+    print_max_len->gid = MAX(ft_strlen(getgrgid(st.st_gid)->gr_name), print_max_len->gid);
     st_size_str = ft_itoa(st.st_size);
-    print_max_len->size = MAX(strlen(st_size_str), print_max_len->size);
-    print_max_len->datetime = MAX(strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
+    print_max_len->size = MAX(ft_strlen(st_size_str), print_max_len->size);
+    print_max_len->datetime = MAX(ft_strlen(get_ctime_ls_format(st.st_mtime)), print_max_len->datetime);
     free(st_size_str);
 }
 
@@ -150,7 +150,7 @@ int ft_ls(const char *path) {
 
     if (is_regular_file(path) == -1) {
         write(STDERR_FILENO, "ls: cannot access '", 19);
-        write(STDERR_FILENO, path, strlen(path));
+        write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);
         return 1;
@@ -260,8 +260,6 @@ int ft_ls(const char *path) {
 _options parse(int argc, char **argv);
 
 int start(int argc, char **argv) {
-    output_format_t format;
-
     if (isatty(STDOUT_FILENO)) {
         options.format = FORMAT_COLUMNS;
     } else {

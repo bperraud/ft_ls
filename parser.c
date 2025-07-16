@@ -1,35 +1,8 @@
 #include "header.h"
 #include <stdio.h>
 
-
-
-
-// typedef enum {
-//     FORMAT_LONG,
-//     FORMAT_SINGLE_COLUMN,
-//     FORMAT_COLUMNS
-// } output_format_t;
-
-// typedef struct struct_print_len {
-//     size_t uid;
-//     size_t gid;
-//     size_t size;
-//     size_t datetime;
-// } _print_max_len;
-
-// typedef struct struct_options {
-//     output_format_t format;
-//     bool is_reversed;
-//     bool is_recursive;
-//     bool is_time_sorted;
-//     bool include_hidden_files;
-// } _options;
-
-
 _options parse(int argc, char **argv) {
     _options options;
-
-    // write(STDERR_FILENO, &argv[1][0], 1);
 
     options.include_hidden_files = false;
     options.is_reversed = false;

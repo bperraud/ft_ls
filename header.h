@@ -6,13 +6,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include "libft/libft/libft.h"
+
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-int is_regular_file(const char *path);
-char *concat(const char *s1, const char *s2);
-const char* path_basename(const char *path);
-char	*ft_itoa(int n);
-
 
 // main
 
@@ -38,7 +34,16 @@ typedef struct struct_options {
 } _options;
 
 
+int is_regular_file(const char *path);
+char *concat(const char *s1, const char *s2);
+const char* path_basename(const char *path);
+char	*ft_itoa(int n);
+size_t	ft_strlen(const char *s);
+
 const char* print_basename(const char *path);
 void print_regular_file(const char *path, _print_max_len *print_max_len);
 void sort_ascii(struct dirent *entries[], size_t count);
 int ft_ls(const char *path);
+
+
+

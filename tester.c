@@ -24,10 +24,10 @@ char *ls(int argc, char *argv[]) {
 
     // Build the command string with arguments
     for (int i = 1; i < argc; i++) {
-        strncat(cmd, " ", MAX_CMD_LEN - strlen(cmd) - 1);
-        strncat(cmd, argv[i], MAX_CMD_LEN - strlen(cmd) - 1);
+        strncat(cmd, " ", MAX_CMD_LEN - ft_strlen(cmd) - 1);
+        strncat(cmd, argv[i], MAX_CMD_LEN - ft_strlen(cmd) - 1);
     }
-    strncat(cmd, " -C", MAX_CMD_LEN - strlen(cmd) - 1);
+    ft_strncat(cmd, " -C", MAX_CMD_LEN - ft_strlen(cmd) - 1);
 
     FILE *pipe = popen(cmd, "r");
     if (!pipe) {
@@ -37,7 +37,7 @@ char *ls(int argc, char *argv[]) {
     }
 
     while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
-        strncat(result, buffer, MAX_OUTPUT_LEN - strlen(result) - 1);
+        ft_strncat(result, buffer, MAX_OUTPUT_LEN - ft_strlen(result) - 1);
     }
 
     pclose(pipe);
