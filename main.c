@@ -134,17 +134,41 @@ void sort_ascii(struct dirent *entries[], size_t count) {
     }
 }
 
-
-blkcnt_t get_block_size(const char *path) {
+void sort_time(struct dirent *entries[], size_t count, const char *path) {
+    struct dirent *tmp;
+    char *complete_i_path;
+    char *complete_j_path;
     struct stat st;
+    time_t i_time;
+    time_t j_time;
 
-    if (lstat(path, &st) != 0) {
-        perror("lstat");
-        exit(1);
+    for (size_t i = 0; i < count - 1; i++) {
+        for (size_t j = 0; j < count - i - 1; j++) {
+            complete_i_path = concat(path, entries[j]->d_name);
+            complete_j_path = concat(path, entries[j + 1]->d_name);
+            if (lstat(complete_i_path, &st) == 0) {
+                i_time = st.st_mtime;
+            }
+            if (lstat(complete_j_path, &st) == 0) {
+                j_time = st.st_mtime;
+            }
+            if (i_time == j_time) {
+                if (ft_strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
+                    tmp = entries[j];
+                    entries[j] = entries[j + 1];
+                    entries[j + 1] = tmp;
+                }
+            }
+            else if (i_time < j_time) {
+                tmp = entries[j];
+                entries[j] = entries[j + 1];
+                entries[j + 1] = tmp;
+            }
+            free(complete_i_path);
+            free(complete_j_path);
+        }
     }
-    return st.st_blocks / 2;
 }
-
 
 bool is_special_dir(const char *path) {
     return !ft_strcmp(path, ".") || !ft_strcmp(path, "..") || !ft_strcmp(path, ".git");
@@ -253,7 +277,11 @@ int ft_ls(const char *path) {
     }
 
     closedir(dir);
-    sort_ascii(entries, entries_number);
+
+    if (options.is_time_sorted)
+        sort_time(entries, entries_number, path);
+    else
+        sort_ascii(entries, entries_number);
     
     print_files_in_folder(entries_number, entries, print_max_len, path);
 

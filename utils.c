@@ -19,6 +19,16 @@ int is_regular_file(const char *path) {
     }
 }
 
+blkcnt_t get_block_size(const char *path) {
+    struct stat st;
+
+    if (lstat(path, &st) != 0) {
+        perror("lstat");
+        exit(1);
+    }
+    return st.st_blocks / 2;
+}
+
 static char	*ft_strcpy(char *dest, const char *src)
 {
 	int	i;
