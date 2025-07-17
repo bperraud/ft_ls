@@ -163,7 +163,6 @@ int ft_ls(const char *path) {
         write(STDERR_FILENO, "ls: cannot access '", 19);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
-        perror(NULL);
         return 1;
     }
 

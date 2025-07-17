@@ -1,14 +1,7 @@
 #include "header.h"
-#include <stdio.h>
 
 _options parse(int argc, char **argv) {
     _options options = {};
-
-    // options.include_hidden_files = false;
-    // options.is_long_format = false;
-    // options.is_reversed = false;
-    // options.is_recursive = false;
-    // options.is_time_sorted = false;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -25,10 +18,10 @@ _options parse(int argc, char **argv) {
                 else if (argv[i][j] == 't')
                     options.is_time_sorted = true;
                 else {
-                    write(STDERR_FILENO, "ls: invalid option -- '", 22);
+                    write(STDERR_FILENO, "ls: invalid option -- '", 23);
                     write(STDERR_FILENO, &argv[i][j], 1);
-                    write(STDERR_FILENO, "'", 1);
-                    perror(NULL);
+                    write(STDERR_FILENO, "'\n", 2);
+                    exit(1);
                 }
             }
             argv[i] = NULL;
