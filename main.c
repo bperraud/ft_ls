@@ -150,6 +150,33 @@ bool is_special_dir(const char *path) {
     return !ft_strcmp(path, ".") || !ft_strcmp(path, "..") || !ft_strcmp(path, ".git");
 }
 
+void print_files_in_folder(int entries_number, struct dirent *entries[], _print_max_len print_max_len, const char *path) {
+    ssize_t start;
+    ssize_t end;
+    ssize_t step;
+    if (options.is_reversed) {
+        start = entries_number - 1;
+        end = -1;
+        step = -1;
+    }
+    else {
+        start = 0;
+        end = entries_number;
+        step = 1;
+    }
+
+    for (ssize_t i = start; i != end; i += step) {
+        if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
+            free(entries[i]);
+            continue;
+        }
+
+        char *complete_path = concat(path, entries[i]->d_name);
+        print_regular_file(complete_path, &print_max_len);
+        free(entries[i]);
+        free(complete_path);
+    }
+}
 
 int ft_ls(const char *path) {
     _print_max_len print_max_len = {0};
@@ -227,33 +254,8 @@ int ft_ls(const char *path) {
 
     closedir(dir);
     sort_ascii(entries, entries_number);
-
-    ssize_t start;
-    ssize_t end;
-    ssize_t step;
-
-    if (options.is_reversed) {
-        start = entries_number - 1;
-        end = -1;
-        step = -1;
-    }
-    else {
-        start = 0;
-        end = entries_number;
-        step = 1;
-    }
-
-    for (ssize_t i = start; i != end; i += step) {
-        if (!options.include_hidden_files && entries[i]->d_name[0] == '.') {
-            free(entries[i]);
-            continue;
-        }
-
-        char *complete_path = concat(path, entries[i]->d_name);
-        print_regular_file(complete_path, &print_max_len);
-        free(entries[i]);
-        free(complete_path);
-    }
+    
+    print_files_in_folder(entries_number, entries, print_max_len, path);
 
     if (options.is_recursive) {
         for (ssize_t i = 0; i < dir_index; i++) {
@@ -266,6 +268,8 @@ int ft_ls(const char *path) {
 
     return 0;
 }
+
+
 
 
 _options parse(int argc, char **argv);
