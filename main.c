@@ -138,7 +138,8 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
     struct dirent *tmp;
     char *complete_i_path;
     char *complete_j_path;
-    struct stat st;
+    struct stat ist;
+    struct stat jst;
     time_t i_time;
     time_t j_time;
 
@@ -146,11 +147,11 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
         for (size_t j = 0; j < count - i - 1; j++) {
             complete_i_path = concat(path, entries[j]->d_name);
             complete_j_path = concat(path, entries[j + 1]->d_name);
-            if (lstat(complete_i_path, &st) == 0) {
-                i_time = st.st_mtime;
+            if (lstat(complete_i_path, &ist) == 0) {
+                i_time = ist.st_mtime;
             }
-            if (lstat(complete_j_path, &st) == 0) {
-                j_time = st.st_mtime;
+            if (lstat(complete_j_path, &jst) == 0) {
+                j_time = jst.st_mtime;
             }
             if (i_time == j_time) {
                 if (ft_strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
@@ -214,6 +215,7 @@ int ft_ls(const char *path) {
         write(STDERR_FILENO, "ls: cannot access '", 19);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
+        perror(NULL);
         return 1;
     }
 
