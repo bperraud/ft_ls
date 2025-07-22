@@ -63,6 +63,8 @@ void print_symlink(const char* path) {
     ft_printf(" -> %s", buffer);
 }
 
+
+
 void print_regular_file(const char *path, _print_max_len *print_max_len) {
     struct stat st;
     const char *file_name;
@@ -70,10 +72,7 @@ void print_regular_file(const char *path, _print_max_len *print_max_len) {
     char *st_nlink_str;
 
     if (options.is_long_format) {
-        if (lstat(path, &st) != 0) {
-            perror("lstat");
-            exit(1);
-        }
+        safe_lstat(path, &st);
         print_permissions(st.st_mode);
         st_nlink_str = ft_itoa(st.st_nlink);
         string_format(ft_strlen(st_nlink_str), print_max_len->hard_links);
@@ -104,10 +103,7 @@ void get_max_line_length(const char *path, _print_max_len *print_max_len) {
     char *          st_size_str;
     char *          st_nlink_str;
 
-    if (lstat(path, &st) != 0) {
-        perror("lstat");
-        exit(1);
-    }
+    safe_lstat(path, &st);
     st_nlink_str = ft_itoa(st.st_nlink);
     print_max_len->hard_links = MAX(ft_strlen(st_nlink_str), print_max_len->hard_links);
     print_max_len->uid = MAX(ft_strlen(getpwuid(st.st_uid)->pw_name), print_max_len->uid);
@@ -147,12 +143,11 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
         for (size_t j = 0; j < count - i - 1; j++) {
             complete_i_path = concat(path, entries[j]->d_name);
             complete_j_path = concat(path, entries[j + 1]->d_name);
-            if (lstat(complete_i_path, &ist) == 0) {
-                i_time = ist.st_mtime;
-            }
-            if (lstat(complete_j_path, &jst) == 0) {
-                j_time = jst.st_mtime;
-            }
+
+            safe_lstat(complete_i_path, &ist);
+            i_time = ist.st_mtime;
+            safe_lstat(complete_j_path, &jst);
+            j_time = jst.st_mtime;
             if (i_time == j_time) {
                 if (ft_strcmp(entries[j]->d_name, entries[j + 1]->d_name) > 0) {
                     tmp = entries[j];
@@ -227,7 +222,10 @@ int ft_ls(const char *path) {
     dir = opendir(path);
 
     if (!dir) {
-        perror(path);
+        write(STDERR_FILENO, "ls: cannot open directory '", 27);
+        write(STDERR_FILENO, path, ft_strlen(path));
+        write(STDERR_FILENO, "': ", 3);
+        perror(NULL);
         return 1;
     }
 
@@ -257,10 +255,6 @@ int ft_ls(const char *path) {
     struct dirent *entries[entries_number];
     char *dir_entries[dir_number];
     dir = opendir(path);
-    if (!dir) {
-        perror(path);
-        return 1;
-    }
 
     int i = 0;
     int dir_index = 0;

@@ -1,12 +1,5 @@
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <sys/stat.h>
-#include <unistd.h>
+
+#include "header.h"
 
 #include "libft/libft/libft.h"
 
@@ -19,13 +12,20 @@ int is_regular_file(const char *path) {
     }
 }
 
+void safe_lstat(const char* path, struct stat *st) {
+    if (lstat(path, st) != 0) {
+        write(STDERR_FILENO, "ls: cannot open '", 17);
+        write(STDERR_FILENO, path, ft_strlen(path));
+        write(STDERR_FILENO, "': ", 3);
+        perror(NULL);
+        exit(1);
+    }
+}
+
 blkcnt_t get_block_size(const char *path) {
     struct stat st;
 
-    if (lstat(path, &st) != 0) {
-        perror("lstat");
-        exit(1);
-    }
+    safe_lstat(path, &st);
     return st.st_blocks / 2;
 }
 

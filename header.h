@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "libft/libft/libft.h"
 
@@ -35,11 +37,9 @@ const char* path_basename(const char *path);
 char	*ft_itoa(int n);
 size_t	ft_strlen(const char *s);
 
+void safe_lstat(const char* path, struct stat *st);
 const char* print_basename(const char *path);
 void print_regular_file(const char *path, _print_max_len *print_max_len);
 void sort_ascii(struct dirent *entries[], size_t count);
 int ft_ls(const char *path);
 blkcnt_t get_block_size(const char *path);
-
-
-
