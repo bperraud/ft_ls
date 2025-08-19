@@ -62,6 +62,6 @@ char *concat(const char *s1, const char *s2) {
     ft_strcpy(result, s1);
     result[len1] = '/';
     result[len1 + 1] = '\0';
-    strcat(result, s2);
+    ft_strlcat(result, s2, ft_strlen(result) + ft_strlen(s2) + 1);
     return result;
 }

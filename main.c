@@ -63,8 +63,6 @@ void print_symlink(const char* path) {
     ft_printf(" -> %s", buffer);
 }
 
-
-
 void print_regular_file(const char *path, _print_max_len *print_max_len) {
     struct stat st;
     const char *file_name;
@@ -292,9 +290,6 @@ int ft_ls(const char *path) {
 
     return 0;
 }
-
-
-
 
 _options parse(int argc, char **argv);
 
