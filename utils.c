@@ -54,7 +54,7 @@ const char* path_basename(const char *path) {
     }
 }
 
-char *concat(const char *s1, const char *s2) {
+char *join_path(const char *s1, const char *s2) {
     size_t len1 = ft_strlen(s1);
     size_t len2 = ft_strlen(s2);
     char *result = malloc(len1 + len2 + 2);

@@ -139,8 +139,8 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
 
     for (size_t i = 0; i < count - 1; i++) {
         for (size_t j = 0; j < count - i - 1; j++) {
-            complete_i_path = concat(path, entries[j]->d_name);
-            complete_j_path = concat(path, entries[j + 1]->d_name);
+            complete_i_path = join_path(path, entries[j]->d_name);
+            complete_j_path = join_path(path, entries[j + 1]->d_name);
 
             safe_lstat(complete_i_path, &ist);
             i_time = ist.st_mtime;
@@ -189,7 +189,7 @@ void print_files_in_folder(int entries_number, struct dirent *entries[], _print_
             continue;
         }
 
-        char *complete_path = concat(path, entries[i]->d_name);
+        char *complete_path = join_path(path, entries[i]->d_name);
         print_regular_file(complete_path, &print_max_len);
         free(entries[i]);
         free(complete_path);
@@ -234,7 +234,7 @@ int ft_ls(const char *path) {
 
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
-        char *total_path = concat(path, entry->d_name);
+        char *total_path = join_path(path, entry->d_name);
         if (!is_special_dir(entry->d_name))
             total_blocks += get_block_size(total_path);
         if (!is_regular_file(total_path)) {
@@ -260,7 +260,7 @@ int ft_ls(const char *path) {
         entries[i] = malloc(sizeof(struct dirent));
         if (entries[i]) {
             ft_memcpy(entries[i], entry, sizeof(struct dirent));
-            char *comp_path = concat(path, entries[i]->d_name);
+            char *comp_path = join_path(path, entries[i]->d_name);
             if (options.is_recursive && !is_regular_file(comp_path) && !is_special_dir(entries[i]->d_name)) {
                 dir_entries[dir_index] = ft_strdup(comp_path);
                 dir_index += 1;
