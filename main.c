@@ -196,7 +196,7 @@ void print_files_in_folder(int entries_number, struct dirent *entries[], _print_
     }
 }
 
-int ft_ls(const char *path) {
+int ft_ls(const char *path, unsigned int option_arg) {
     _print_max_len print_max_len = {0};
     DIR *dir;
 
@@ -276,14 +276,17 @@ int ft_ls(const char *path) {
         sort_time(entries, entries_number, path);
     else
         sort_ascii(entries, entries_number);
+
+
+    if (option_arg > 0) {
+        ft_printf("%s:\n", path);
+    }
     
     print_files_in_folder(entries_number, entries, print_max_len, path);
 
     if (options.is_recursive) {
         for (ssize_t i = 0; i < dir_index; i++) {
-            ft_printf("\n");
-            ft_printf("%s:\n", dir_entries[i]);
-            ft_ls(dir_entries[i]);
+            ft_ls(dir_entries[i], option_arg);
             free(dir_entries[i]);
         }
     }
@@ -301,20 +304,18 @@ int start(int argc, char **argv) {
     int ft_exit_code;
     int option_arg = 0;
 
-    if (argc < 2) {
-        return ft_ls(".");
-    }
+    if (argc < 2)
+        return ft_ls(".", option_arg);
     for (int i = 1; i < argc; i++) {
         if (argv[i] == NULL) {
             option_arg += 1;
             continue;
         }
-        ft_exit_code = ft_ls(argv[i]);
+        ft_exit_code = ft_ls(argv[i], argc);
         program_exit_code = MAX(program_exit_code, ft_exit_code);
     }
-    if (option_arg == argc - 1) {
-        return ft_ls(".");
-    }
+    if (option_arg == argc - 1)
+        return ft_ls(".", option_arg);
     return program_exit_code;
 }
 

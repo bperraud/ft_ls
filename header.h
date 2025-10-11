@@ -41,5 +41,5 @@ void safe_lstat(const char* path, struct stat *st);
 const char* print_basename(const char *path);
 void print_regular_file(const char *path, _print_max_len *print_max_len);
 void sort_ascii(struct dirent *entries[], size_t count);
-int ft_ls(const char *path);
+int ft_ls(const char *path, unsigned int option_arg);
 blkcnt_t get_block_size(const char *path);
