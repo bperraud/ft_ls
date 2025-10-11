@@ -166,7 +166,7 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
 }
 
 bool is_special_dir(const char *path) {
-    return !ft_strncmp(path, ".", 1) || !ft_strcmp(path, "..");
+    return !ft_strcmp(path, ".") || !ft_strcmp(path, "..");
 }
 
 void print_files_in_folder(int entries_number, struct dirent *entries[], _print_max_len print_max_len, const char *path) {
@@ -237,12 +237,15 @@ int ft_ls(const char *path, unsigned int option_arg) {
     while ((entry = readdir(dir)) != NULL) {
         entries_number += 1;
         char *total_path = join_path(path, entry->d_name);
-        if (!is_special_dir(entry->d_name))
-            total_blocks += get_block_size(total_path);
         if (!is_regular_file(total_path)) {
             dir_number += 1;
         }
         get_max_line_length(total_path, &print_max_len);
+        if (!options.include_hidden_files && entry->d_name[0] == '.') {
+            free(total_path);
+            continue;
+        }
+        total_blocks += get_block_size(total_path);
         free(total_path);
     }
 
