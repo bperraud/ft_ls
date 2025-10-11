@@ -207,7 +207,7 @@ int ft_ls(const char *path, unsigned int option_arg) {
         first_arg = false;
 
     if (is_regular_file(path) == -1) {
-        write(STDERR_FILENO, "ls: cannot access '", 19);
+        write(STDERR_FILENO, "ft_ls: cannot access '", 19);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);
@@ -222,7 +222,7 @@ int ft_ls(const char *path, unsigned int option_arg) {
     dir = opendir(path);
 
     if (!dir) {
-        write(STDERR_FILENO, "ls: cannot open directory '", 27);
+        write(STDERR_FILENO, "ft_ls: cannot open directory '", 27);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);

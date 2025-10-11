@@ -18,7 +18,7 @@ _options parse(int argc, char **argv) {
                 else if (argv[i][j] == 't')
                     options.is_time_sorted = true;
                 else {
-                    write(STDERR_FILENO, "ls: invalid option -- '", 23);
+                    write(STDERR_FILENO, "ft_ls: invalid option -- '", 23);
                     write(STDERR_FILENO, &argv[i][j], 1);
                     write(STDERR_FILENO, "'\n", 2);
                     exit(1);

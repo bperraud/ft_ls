@@ -14,7 +14,7 @@ int is_regular_file(const char *path) {
 
 void safe_lstat(const char* path, struct stat *st) {
     if (lstat(path, st) != 0) {
-        write(STDERR_FILENO, "ls: cannot open '", 17);
+        write(STDERR_FILENO, "ft_ls: cannot open '", 17);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);
