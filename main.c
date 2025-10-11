@@ -12,6 +12,7 @@
 #include "libft/ft_printf.h"
 
 _options options;
+bool    first_arg;
 
 
 void print_permissions(mode_t mode) {
@@ -200,9 +201,10 @@ int ft_ls(const char *path, unsigned int option_arg) {
     _print_max_len print_max_len = {0};
     DIR *dir;
 
-    if (options.is_recursive && !ft_strcmp(path, ".")) {
-        ft_printf(".:\n");
-    }
+    if (!first_arg)
+        ft_printf("\n");
+    else
+        first_arg = false;
 
     if (is_regular_file(path) == -1) {
         write(STDERR_FILENO, "ls: cannot access '", 19);
@@ -303,6 +305,7 @@ int start(int argc, char **argv) {
     int program_exit_code;
     int ft_exit_code;
     int option_arg = 0;
+    first_arg = true;
 
     if (argc < 2)
         return ft_ls(".", option_arg);
