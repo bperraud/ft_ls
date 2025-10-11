@@ -166,7 +166,7 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
 }
 
 bool is_special_dir(const char *path) {
-    return !ft_strcmp(path, ".") || !ft_strcmp(path, "..");
+    return !ft_strncmp(path, ".", 1) || !ft_strcmp(path, "..");
 }
 
 void print_files_in_folder(int entries_number, struct dirent *entries[], _print_max_len print_max_len, const char *path) {
@@ -248,7 +248,6 @@ int ft_ls(const char *path, unsigned int option_arg) {
 
     if (options.is_long_format)
         ft_printf("total %d\n", total_blocks);
-        // ft_printf("total %lld\n", (long long)total_blocks);
 
     closedir(dir);
 
@@ -280,7 +279,7 @@ int ft_ls(const char *path, unsigned int option_arg) {
         sort_ascii(entries, entries_number);
 
 
-    if (option_arg > 0) {
+    if (option_arg > 1) {
         ft_printf("%s:\n", path);
     }
     
@@ -314,7 +313,7 @@ int start(int argc, char **argv) {
             option_arg += 1;
             continue;
         }
-        ft_exit_code = ft_ls(argv[i], argc);
+        ft_exit_code = ft_ls(argv[i], argc - 1);
         program_exit_code = MAX(program_exit_code, ft_exit_code);
     }
     if (option_arg == argc - 1)
