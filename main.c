@@ -166,7 +166,7 @@ void sort_time(struct dirent *entries[], size_t count, const char *path) {
 }
 
 bool is_special_dir(const char *path) {
-    return !ft_strcmp(path, ".") || !ft_strcmp(path, "..") || !ft_strcmp(path, ".git");
+    return !ft_strcmp(path, ".") || !ft_strcmp(path, "..");
 }
 
 void print_files_in_folder(int entries_number, struct dirent *entries[], _print_max_len print_max_len, const char *path) {
