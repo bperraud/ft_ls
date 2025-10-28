@@ -201,26 +201,26 @@ int ft_ls(const char *path, unsigned int option_arg) {
     _print_max_len print_max_len = {0};
     DIR *dir;
 
-    if (!first_arg)
+    if (!first_arg) {
         ft_printf("\n");
-    else
+    }
+    else {
         first_arg = false;
+    }
 
     if (is_regular_file(path) == -1) {
-        write(STDERR_FILENO, "ft_ls: cannot access '", 19);
+        write(STDERR_FILENO, "ft_ls: cannot access '", 22);
         write(STDERR_FILENO, path, ft_strlen(path));
         write(STDERR_FILENO, "': ", 3);
         perror(NULL);
         return 1;
     }
-
     if (is_regular_file(path)) {
         print_regular_file(path, &print_max_len);
         return 0;
     }
 
     dir = opendir(path);
-
     if (!dir) {
         write(STDERR_FILENO, "ft_ls: cannot open directory '", 27);
         write(STDERR_FILENO, path, ft_strlen(path));
@@ -253,11 +253,9 @@ int ft_ls(const char *path, unsigned int option_arg) {
         ft_printf("total %d\n", total_blocks);
 
     closedir(dir);
-
     struct dirent *entries[entries_number];
     char *dir_entries[dir_number];
     dir = opendir(path);
-
     int i = 0;
     int dir_index = 0;
     while ((entry = readdir(dir)) != NULL) {
@@ -275,19 +273,16 @@ int ft_ls(const char *path, unsigned int option_arg) {
     }
 
     closedir(dir);
-
-    if (options.is_time_sorted)
+    if (options.is_time_sorted) {
         sort_time(entries, entries_number, path);
-    else
+    }
+    else {
         sort_ascii(entries, entries_number);
-
-
+    }
     if (option_arg > 1) {
         ft_printf("%s:\n", path);
     }
-    
     print_files_in_folder(entries_number, entries, print_max_len, path);
-
     if (options.is_recursive) {
         for (ssize_t i = 0; i < dir_index; i++) {
             ft_ls(dir_entries[i], option_arg);
